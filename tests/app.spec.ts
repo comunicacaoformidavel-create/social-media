@@ -1,0 +1,208 @@
+import { readFile } from 'node:fs/promises';
+import { expect, test, type Page } from '@playwright/test';
+
+const unique = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+const nav = (page: Page, name: string) => page.getByRole('navigation', { name: 'Navegação principal' }).getByRole('button', { name: new RegExp(`^${name}(?:\\s|$)`) }).click();
+
+async function load(page: Page) {
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Seu conteúdo, no ritmo certo');
+}
+
+async function addClient(page: Page, name: string) {
+  await nav(page, 'Clientes');
+  await page.getByRole('button', { name: 'Novo cliente', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'Novo cliente' });
+  await dialog.getByLabel('Nome da marca').fill(name);
+  await dialog.getByLabel('Segmento').fill('Gastronomia');
+  await dialog.getByLabel('Pessoa de contato').fill('Ana, atendimento');
+  await dialog.getByLabel('E-mail', { exact: true }).fill('ana@example.com');
+  await dialog.getByRole('button', { name: 'Adicionar cliente' }).click();
+  await expect(dialog).toBeHidden();
+  await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
+}
+
+test('cliente, demanda, mudança de etapa e resultados ficam salvos', async ({ page }) => {
+  const client = `Marca de teste ${unique()}`;
+  const title = `Carrossel de lançamento ${unique()}`;
+  const browserErrors: string[] = [];
+  page.on('pageerror', error => browserErrors.push(error.message));
+  await load(page);
+  await page.screenshot({ path: '/tmp/compasso-dashboard.png', fullPage: true });
+  await addClient(page, client);
+  await nav(page, 'Demandas');
+  await page.getByRole('button', { name: 'Nova demanda', exact: true }).first().click();
+  const dialog = page.getByRole('dialog', { name: 'Nova demanda' });
+  await dialog.getByLabel('Título da demanda').fill(title);
+  await dialog.getByLabel('Cliente', { exact: false }).selectOption({ label: client });
+  await dialog.getByLabel('Formato', { exact: true }).selectOption('Carrossel');
+  await dialog.getByLabel('Prioridade', { exact: true }).selectOption('high');
+  await dialog.getByLabel('Responsável').fill('Equipe criativa');
+  await dialog.getByLabel('Etiquetas').fill('lançamento, estratégico');
+  await dialog.getByLabel('Briefing e observações').fill('Apresentar a campanha com chamada para a nova coleção.');
+  await dialog.getByRole('button', { name: 'Criar demanda', exact: true }).click();
+  await expect(dialog).toBeHidden();
+  await page.getByLabel('Buscar demanda', { exact: true }).fill(title);
+  await expect(page.getByRole('button', { name: title, exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Visualização em lista' }).click();
+  const status = page.getByLabel(`Status de ${title}`, { exact: true });
+  await status.selectOption('published');
+  await expect(status).toHaveValue('published');
+  await page.getByRole('button', { name: new RegExp(`^${title}`) }).click();
+  const edit = page.getByRole('dialog', { name: 'Editar demanda' });
+  await expect(edit.getByLabel('Etapa', { exact: true })).toHaveValue('published');
+  await edit.getByLabel('Alcance', { exact: true }).fill('1000');
+  await edit.getByLabel('Impressões', { exact: true }).fill('1500');
+  await edit.getByLabel('Curtidas', { exact: true }).fill('80');
+  await edit.getByLabel('Comentários', { exact: true }).fill('10');
+  await edit.getByLabel('Salvamentos', { exact: true }).fill('10');
+  await edit.getByRole('button', { name: 'Salvar alterações' }).click();
+  await expect(edit).toBeHidden();
+  await page.reload();
+  await nav(page, 'Relatórios');
+  await page.getByLabel('Filtrar relatórios por cliente').selectOption({ label: client });
+  const metrics = page.locator('.insight-kpis');
+  await expect(metrics.locator('.insight-metric').filter({ hasText: 'Alcance informado' }).locator('strong')).toHaveText('1.000');
+  await expect(metrics.locator('.insight-metric').filter({ hasText: 'Engajamento' }).locator('strong')).toHaveText('10%');
+  await expect(page.getByRole('cell', { name: new RegExp(title) })).toBeVisible();
+  await nav(page, 'Calendário');
+  await page.getByLabel('Filtrar por cliente', { exact: true }).selectOption({ label: client });
+  await expect(page.locator('.calendar-event').filter({ hasText: title })).toBeVisible();
+  expect(browserErrors).toEqual([]);
+});
+
+test('checklist conserva tarefas concluídas ao recarregar e filtra por dia', async ({ page }) => {
+  const title = `Revisar legendas ${unique()}`;
+  await load(page);
+  await nav(page, 'Checklist diário');
+  await page.getByLabel('Adicionar item ao checklist').fill(title);
+  await page.getByRole('button', { name: 'Adicionar tarefa', exact: true }).click();
+  const checkbox = page.getByRole('checkbox', { name: title, exact: true });
+  await expect(checkbox).toHaveAttribute('aria-checked', 'false');
+  await checkbox.click();
+  await expect(checkbox).toHaveAttribute('aria-checked', 'true');
+  await page.reload();
+  await nav(page, 'Checklist diário');
+  await page.getByRole('button', { name: /^Concluídas/ }).click();
+  await expect(checkbox).toHaveAttribute('aria-checked', 'true');
+  await page.getByRole('button', { name: /^Pendentes/ }).click();
+  await expect(checkbox).toBeHidden();
+  await page.getByRole('button', { name: /^Todas/ }).click();
+  await page.getByRole('button', { name: 'Próximo dia', exact: true }).click();
+  await expect(checkbox).toBeHidden();
+  await page.getByRole('button', { name: 'Voltar para hoje' }).click();
+  await expect(checkbox).toHaveAttribute('aria-checked', 'true');
+});
+
+test('anotações podem ser criadas, filtradas por cliente e cor, e editadas', async ({ page }) => {
+  const client = `Cliente notas ${unique()}`;
+  const title = `Referências de campanha ${unique()}`;
+  await load(page);
+  await addClient(page, client);
+  await nav(page, 'Anotações');
+  await page.getByRole('button', { name: 'Nova anotação', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'Nova anotação' });
+  await dialog.getByLabel('Título', { exact: false }).fill(title);
+  await dialog.getByLabel('Anotação', { exact: false }).fill('Referência visual: natureza, textura e luz suave.');
+  await dialog.getByLabel('Cliente relacionado').selectOption({ label: client });
+  await dialog.locator('label[title="Azul"]').click();
+  await expect(dialog.getByRole('radio', { name: 'Azul', exact: true })).toBeChecked();
+  await dialog.getByRole('button', { name: 'Guardar anotação' }).click();
+  await expect(dialog).toBeHidden();
+  await page.getByLabel('Filtrar por cliente', { exact: true }).selectOption({ label: client });
+  await page.getByRole('button', { name: 'Filtrar notas azuis' }).click();
+  await page.getByLabel('Buscar anotação').fill(title);
+  await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Filtrar notas rosas' }).click();
+  await expect(page.getByRole('heading', { name: title, exact: true })).toBeHidden();
+  await page.getByRole('button', { name: 'Todas as cores' }).click();
+  await page.getByRole('button', { name: `Editar nota ${title}`, exact: true }).click();
+  const edit = page.getByRole('dialog', { name: 'Editar anotação' });
+  await edit.getByLabel('Anotação', { exact: false }).fill('Referência aprovada. Produzir três variações de capa.');
+  await edit.getByRole('button', { name: 'Salvar alterações' }).click();
+  await expect(edit).toBeHidden();
+  await page.reload();
+  await nav(page, 'Anotações');
+  await page.getByLabel('Buscar anotação').fill(title);
+  await expect(page.getByText('Referência aprovada. Produzir três variações de capa.', { exact: true })).toBeVisible();
+});
+
+test('modelo CSV, importação das ferramentas e relatório exportado têm dados reais', async ({ page }) => {
+  const suffix = unique();
+  const client = `Cliente importado ${suffix}`;
+  const title = `Post importado ${suffix}`;
+  await load(page);
+  await nav(page, 'Integrações');
+  const templateDownload = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Baixar modelo CSV', exact: true }).click();
+  const template = await templateDownload;
+  expect(template.suggestedFilename()).toBe('compasso-modelo-importacao.csv');
+  const templateText = await readFile((await template.path())!, 'utf8');
+  expect(templateText).toContain('"title","client","date","status","format","channel","reach","impressions","likes","comments","saves"');
+  await page.locator('.insight-integration-card').filter({ has: page.getByRole('heading', { name: 'Aprova Aí', exact: true }) }).getByRole('button', { name: 'Importar planilha' }).click();
+  const date = new Intl.DateTimeFormat('en-CA', { timeZone: 'Etc/GMT+3' }).format(new Date());
+  const csv = `title,client,date,status,format,channel,reach,impressions,likes,comments,saves\n${title},${client},${date},published,Reels,Instagram,2400,3500,100,10,10\n`;
+  const upload = page.getByLabel('Selecionar arquivo CSV');
+  await upload.setInputFiles({ name: 'aprova-resultados.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
+  await expect(page.locator('.insight-preview')).toContainText(title);
+  await page.getByRole('button', { name: 'Confirmar importação' }).click();
+  await expect(page.locator('.insight-success')).toContainText('1 demandas criadas.');
+  await upload.setInputFiles({ name: 'aprova-resultados.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
+  await page.getByRole('button', { name: 'Confirmar importação' }).click();
+  await expect(page.locator('.insight-success')).toContainText('0 demandas criadas.');
+  await expect(page.locator('.insight-success')).toContainText('1 linhas ignoradas.');
+  await page.locator('.insight-integration-card').filter({ has: page.getByRole('heading', { name: 'Operand', exact: true }) }).getByRole('button', { name: 'Importar planilha' }).click();
+  await expect(page.getByRole('region', { name: 'Importar Operand' })).toBeVisible();
+  const scheduled = `Conteúdo planejado ${suffix}`;
+  const operandCsv = `title;client;date;status;format;channel\n${scheduled};${client};${date};scheduled;Post;LinkedIn\n`;
+  await upload.setInputFiles({ name: 'operand-demandas.csv', mimeType: 'text/csv', buffer: Buffer.from(operandCsv) });
+  await page.getByRole('button', { name: 'Confirmar importação' }).click();
+  await expect(page.locator('.insight-success')).toContainText('1 demandas criadas.');
+  await nav(page, 'Demandas');
+  await page.getByLabel('Buscar demanda', { exact: true }).fill(scheduled);
+  await expect(page.getByRole('combobox', { name: `Status de ${scheduled}`, exact: true })).toHaveValue('scheduled');
+  await nav(page, 'Integrações');
+  const backupDownload = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Exportar backup JSON' }).click();
+  const backup = await backupDownload;
+  const backupData = JSON.parse(await readFile((await backup.path())!, 'utf8'));
+  expect(backupData.tasks.filter((task: { title: string }) => task.title === title || task.title === scheduled)).toHaveLength(2);
+  await nav(page, 'Relatórios');
+  await page.getByLabel('Filtrar relatórios por cliente').selectOption({ label: client });
+  await expect(page.locator('.insight-metric').filter({ hasText: 'Alcance informado' }).locator('strong')).toHaveText('2.400');
+  await expect(page.locator('.insight-metric').filter({ hasText: 'Engajamento' }).locator('strong')).toHaveText('5%');
+  await expect(page.getByRole('cell', { name: new RegExp(title) })).toBeVisible();
+  const reportDownload = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Exportar relatório' }).click();
+  const report = await reportDownload;
+  const reportText = await readFile((await report.path())!, 'utf8');
+  expect(reportText).toContain(title);
+  expect(reportText).toContain(',"2400","3500","100","10","10"');
+  expect(reportText.split(/\r?\n/)).toHaveLength(2);
+});
+
+test('celular navega pelas páginas sem transbordar e mantém a janela utilizável', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await load(page);
+  await page.screenshot({ path: '/tmp/compasso-mobile.png', fullPage: true });
+  for (const name of ['Demandas', 'Calendário', 'Checklist diário', 'Clientes', 'Anotações', 'Relatórios', 'Integrações', 'Visão geral']) {
+    await page.getByRole('button', { name: 'Abrir navegação' }).click();
+    await nav(page, name);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect.poll(() => page.evaluate(() => ({ width: document.documentElement.scrollWidth, viewport: window.innerWidth })), { message: `Sem transbordamento horizontal em ${name}` }).toEqual({ width: 390, viewport: 390 });
+  }
+  const create = page.getByRole('button', { name: 'Nova demanda', exact: true }).first();
+  await create.click();
+  const dialog = page.getByRole('dialog', { name: 'Nova demanda' });
+  await expect(dialog.getByLabel('Título da demanda')).toBeFocused();
+  const bounds = await dialog.boundingBox();
+  expect(bounds).not.toBeNull();
+  expect(bounds!.x).toBeGreaterThanOrEqual(0);
+  expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(390);
+  expect(bounds!.height).toBeLessThanOrEqual(844);
+  await dialog.getByRole('button', { name: 'Criar demanda', exact: true }).scrollIntoViewIfNeeded();
+  await expect(dialog.getByRole('button', { name: 'Criar demanda', exact: true })).toBeInViewport();
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  await expect(create).toBeFocused();
+});
