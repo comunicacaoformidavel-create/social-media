@@ -15,7 +15,9 @@ Abra no navegador o endereço da interface informado pelo Vite no terminal, na *
 
 Se o cache padrão do npm não for gravável no ambiente Linux, use `npm ci --cache /tmp/compasso-npm-cache`.
 
-O primeiro início cria automaticamente cinco clientes e conteúdos **fictícios** para explorar as funções. Os exemplos podem ser editados ou excluídos. Não é necessário cadastrar credenciais externas.
+O primeiro início abre um workspace **vazio**, pronto para os seus clientes e conteúdos. Não é necessário cadastrar credenciais externas.
+
+Se você já usava a versão com exemplos, abra **Meu espaço → Limpar dados do app**, digite **LIMPAR** e confirme. A limpeza remove todos os registros do workspace e cria uma cópia JSON em `data/backups/` antes de apagar. O workspace continua vazio após reiniciar. Os exemplos ficam disponíveis apenas para testes, com `COMPASSO_DEMO=true` em um diretório de dados novo.
 
 ## O que funciona
 

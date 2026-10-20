@@ -1,7 +1,7 @@
 import express from "express";
 import { DatabaseSync } from "node:sqlite";
 import { randomUUID, createHash } from "node:crypto";
-import { mkdirSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -200,7 +200,7 @@ function importNumber(value, label) {
 
 export function createApp({
   dataDir = process.env.DATA_DIR || path.join(ROOT, "data"),
-  seed = true,
+  seed = process.env.COMPASSO_DEMO === "true",
 } = {}) {
   mkdirSync(dataDir, { recursive: true });
   const db = new DatabaseSync(path.join(dataDir, "compasso.sqlite"));
@@ -371,15 +371,14 @@ export function createApp({
     },
   });
   if (
-    seed &&
     !db.prepare("SELECT value FROM metadata WHERE key = ?").get("initialized")
   ) {
     db.exec("BEGIN");
     try {
-      seedData(put);
+      if (seed) seedData(put);
       db.prepare("INSERT OR REPLACE INTO metadata(key,value) VALUES(?,?)").run(
         "demo",
-        "true",
+        seed ? "true" : "false",
       );
       db.prepare("INSERT OR REPLACE INTO metadata(key,value) VALUES(?,?)").run(
         "initialized",
@@ -417,6 +416,49 @@ export function createApp({
     );
     res.set("Cache-Control", "no-store");
     res.json({ version: 1, exportedAt: new Date().toISOString(), ...state() });
+  });
+
+  app.post("/api/workspace/reset", (req, res) => {
+    if (req.body?.confirmation !== "LIMPAR") {
+      throw failure('Para limpar os dados, confirme digitando "LIMPAR".');
+    }
+    const before = state();
+    const backupDir = path.join(dataDir, "backups");
+    const backupName = `compasso-antes-da-limpeza-${Date.now()}-${randomUUID()}.json`;
+    // Back up successfully before deleting anything. Never include backups in Git.
+    try {
+      mkdirSync(backupDir, { recursive: true });
+      writeFileSync(
+        path.join(backupDir, backupName),
+        JSON.stringify(
+          { version: 1, exportedAt: new Date().toISOString(), ...before },
+          null,
+          2,
+        ),
+        { flag: "wx", mode: 0o600 },
+      );
+    } catch {
+      throw failure(
+        "Não foi possível criar a cópia de segurança. Nenhum dado foi removido. Confira se a pasta de dados permite gravação.",
+        503,
+        { expose: true },
+      );
+    }
+    db.exec("BEGIN");
+    try {
+      db.exec("DELETE FROM entities");
+      const metadata = db.prepare(
+        "INSERT OR REPLACE INTO metadata(key,value) VALUES(?,?)",
+      );
+      metadata.run("demo", "false");
+      metadata.run("initialized", "true");
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+    res.set("Cache-Control", "no-store");
+    res.json({ cleared: true, backupCreated: true });
   });
 
   for (const kind of ["clients", "tasks", "checklist", "notes"]) {
@@ -672,16 +714,14 @@ export function createApp({
         ? "O envio JSON deve ter até 8 MB; arquivos CSV devem ter até 2 MB."
         : error.type === "entity.parse.failed"
           ? "JSON inválido."
-          : status >= 500
+          : status >= 500 && !error.expose
             ? "Não foi possível concluir a operação."
             : error.message;
-    if (status >= 500) console.error(error);
-    res
-      .status(status)
-      .json({
-        error: message,
-        ...(error.errors ? { errors: error.errors } : {}),
-      });
+    if (status >= 500 && !error.expose) console.error(error);
+    res.status(status).json({
+      error: message,
+      ...(error.errors ? { errors: error.errors } : {}),
+    });
   });
   return { app, db, close: () => db.close() };
 }

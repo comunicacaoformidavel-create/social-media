@@ -1,0 +1,610 @@
+/* Brighter workspace palette; layout and typography stay in styles.css. */
+:root {
+  --green: #136b4f;
+  --muted: #72816d;
+  --border: #e1eadc;
+  --sage: #e4f6cf;
+  color: #263f32;
+  background: #f8fbf5;
+}
+::selection {
+  background: #ccef9b;
+  color: #174c36;
+}
+button:focus-visible,
+a:focus-visible,
+select:focus-visible {
+  outline-color: #228959;
+}
+input:focus-visible,
+textarea:focus-visible {
+  outline-color: #73b844;
+}
+.sidebar {
+  background: #f0f6e8;
+  border-color: #dce8ce;
+}
+.brand-symbol {
+  color: #186441;
+  background: #cfef9a;
+}
+.brand > span:last-child {
+  color: #19543c;
+}
+.brand small,
+.greeting,
+.eyebrow {
+  color: #5b7b38;
+}
+.nav-item {
+  color: #617453;
+}
+.nav-item:hover {
+  color: #235d3b;
+  background: #e0efce;
+}
+.nav-item.active {
+  color: #205c38;
+  background: #d5f0ad;
+}
+.nav-count {
+  background: #bde67b;
+  color: #315a1e;
+}
+.nav-new {
+  background: #ffedb3;
+  color: #86621a;
+  border-color: #f3d88a;
+}
+.sidebar-note {
+  background: #e7f3be;
+  border-color: #d7e99e;
+}
+.sidebar-note p,
+.sidebar-note strong {
+  color: #536d29;
+}
+.little-star {
+  color: #74a92b;
+}
+.note-squiggle {
+  color: #cee68b;
+}
+.workspace-icon {
+  background: #ffdda7;
+  color: #986125;
+  border-color: #f2c77c;
+}
+.workspace-switch > span:nth-child(2) {
+  color: #3b5938;
+}
+.local-status,
+.local-status > span {
+  color: #66834a;
+}
+.local-status > span,
+.live-dot,
+.notification-dot {
+  background: #75b733;
+}
+.topbar {
+  background: #fffffacc;
+  border-color: #e1ead7;
+}
+.breadcrumb strong {
+  color: #4a673d;
+}
+.profile-avatar {
+  background: #ffd9a0;
+  color: #8b5c25;
+}
+.page-heading h1 {
+  color: #214f36;
+}
+.heading-dot {
+  color: #7fbc2e;
+}
+.page-heading p,
+.panel-heading p,
+.muted,
+.overview-filters > span {
+  color: #768568;
+}
+.button.primary {
+  background: #136b4f;
+  border-color: #136b4f;
+  color: #fff;
+}
+.button.primary:hover {
+  background: #0c573e;
+  border-color: #0c573e;
+}
+.button.secondary {
+  border-color: #d6e4c7;
+  color: #4e7139;
+  background: #fffffa;
+}
+.button.secondary:hover {
+  background: #edf7dc;
+  border-color: #b9d69b;
+}
+.text-button,
+.icon-button,
+.select-filter,
+.select-filter select {
+  color: #628247;
+}
+.text-button:hover {
+  color: #1c713e;
+}
+.icon-button:hover,
+.icon-button.selected {
+  background: #e0f0c9;
+  color: #2c713c;
+}
+.panel,
+.stat-card {
+  border-color: #e0e9d6;
+}
+.panel-heading h2,
+.section-heading h2 {
+  color: #3e5f32;
+}
+.stat-top {
+  color: #657d50;
+}
+.stat-number {
+  color: #285139;
+}
+.stat-foot {
+  color: #748c5d;
+}
+.stat-icon.green,
+.green {
+  background: #e0f3c1;
+  color: #5c9428;
+}
+.stat-icon.purple,
+.purple {
+  background: #eee1ff;
+  color: #9361d3;
+}
+.stat-icon.peach,
+.peach {
+  background: #ffe3bf;
+  color: #d3812b;
+}
+.stat-icon.blue,
+.blue {
+  background: #dcefff;
+  color: #3e90c8;
+}
+.stat-spark {
+  background: transparent;
+  opacity: 0.85;
+}
+.stat-spark.green {
+  color: #73aa34;
+}
+.stat-spark.purple {
+  color: #a37ad7;
+}
+.stat-spark.peach {
+  color: #e7a04f;
+}
+.stat-spark.blue {
+  color: #6aaedb;
+}
+.week-day {
+  border-color: #dfe8cf;
+}
+.week-day.active {
+  background: #e0f4bd;
+  border-color: #a9d36c;
+}
+.week-day.active strong {
+  color: #4b7726;
+}
+.week-day strong,
+.week-day.active > span:first-child {
+  color: #68874d;
+}
+.week-day > span:first-child,
+.week-heading,
+.schedule-label {
+  color: #7c9167;
+}
+.week-day:hover {
+  background: #edf7d9;
+}
+.schedule-info > strong,
+.focus-description > strong,
+.table-title {
+  color: #3b673f;
+}
+.client-badge {
+  color: #618348;
+}
+.status-idea {
+  color: #697561;
+  background: #eef1e7;
+}
+.status-progress {
+  color: #995719;
+  background: #ffe7c9;
+}
+.status-review {
+  color: #7950b1;
+  background: #efdefe;
+}
+.status-scheduled {
+  color: #286e9d;
+  background: #dcefff;
+}
+.status-published {
+  color: #447a26;
+  background: #e1f3c7;
+}
+.cover-peach {
+  background: #ffdfb8;
+  color: #ae6c22;
+}
+.cover-sage {
+  background: #dff1ba;
+  color: #608326;
+}
+.cover-pink {
+  background: #ffd5e2;
+  color: #b64b73;
+}
+.cover-blue {
+  background: #d4ecff;
+  color: #367ca7;
+}
+.cover-sand {
+  background: #ffeca9;
+  color: #a4851e;
+}
+.assignee-avatar {
+  background: #ffdeb0;
+  color: #987335;
+}
+.priority-high {
+  background: #eb795b;
+}
+.priority-medium {
+  background: #edb731;
+}
+.priority-low {
+  background: #86b84d;
+}
+.creative-card {
+  background:
+    radial-gradient(ellipse at 80% 0%, #3c8b55 0%, transparent 60%), #155c43;
+}
+.creative-card h3 {
+  color: #f3ffe5;
+}
+.creative-card p {
+  color: #c1deb0;
+}
+.creative-art,
+.creative-eyebrow {
+  color: #caee89;
+}
+.creative-card button {
+  background: #c5ed86;
+  border-color: #c5ed86;
+  color: #2d5d28;
+}
+.creative-card button:hover {
+  background: #d6f6a2;
+}
+.orbit {
+  border-color: #b9e18455;
+}
+.check-row > button:first-child {
+  color: #59743d;
+}
+.checkbox-square {
+  border-color: #b5d08f;
+}
+.check-row.done .checkbox-square {
+  color: #fff;
+  background: #6ca735;
+  border-color: #6ca735;
+}
+.check-row.done > button:first-child > span:last-child {
+  color: #94aa7e;
+}
+.progress-track > span {
+  background: #80b943;
+}
+.checklist-progress > span:last-child,
+.checklist-progress strong {
+  color: #6a9a30;
+}
+.quick-check {
+  border-color: #bcd89a;
+  color: #7aa449;
+}
+.quick-check input::placeholder {
+  color: #849e68;
+}
+.checklist-link {
+  color: #62863f;
+  background: #f1f8e5;
+}
+.note-yellow {
+  background: #fff0b3;
+  border-color: #efda88;
+  color: #8a701d;
+}
+.note-pink {
+  background: #ffdeeb;
+  border-color: #f2b9d0;
+  color: #a35477;
+}
+.note-green {
+  background: #e0f4bf;
+  border-color: #c0df97;
+  color: #638034;
+}
+.note-blue {
+  background: #dcefff;
+  border-color: #b7d9f3;
+  color: #4e83aa;
+}
+.note-preview h3,
+.note-preview p {
+  color: inherit;
+}
+.note-preview p {
+  opacity: 0.9;
+}
+.kanban-column {
+  background: #f0f6e8;
+  border-color: #dee9d0;
+}
+.kanban-heading h2,
+.task-title-button {
+  color: #4e7437;
+}
+.kanban-heading em {
+  background: #d9eaba;
+  color: #668c3c;
+}
+.task-card {
+  border-color: #dbe8c9;
+}
+.task-tag {
+  background: #edf5dd;
+  color: #79944f;
+}
+.card-status-label > select,
+.add-card {
+  color: #7a9a50;
+}
+.view-toggle > button.active {
+  color: #4b842c;
+  background: #daf0ba;
+}
+.calendar-weekdays {
+  background: #e9f4d9;
+}
+.calendar-cell.current {
+  background: #f1f9e6;
+}
+.calendar-cell.current .calendar-day-number {
+  color: #fff;
+  background: #6ca038;
+}
+.check-tabs > button.active {
+  color: #468434;
+  border-color: #78b748;
+}
+.tip-card {
+  background: #e7f4c7;
+  border-color: #d5e99f;
+}
+.tip-card h3,
+.progress-panel h3 {
+  color: #658937;
+}
+.progress-ring circle:nth-child(2) {
+  stroke: #72b13c;
+}
+.progress-ring strong {
+  color: #57982e;
+}
+.client-card h2,
+.client-numbers strong {
+  color: #4c7e33;
+}
+.segment-chip {
+  background: #edf6db;
+  border-color: #dceac5;
+  color: #7a994e;
+}
+.insight-icon {
+  color: #6d9b3e;
+  background: #eaf4dc;
+}
+.insight-period button.active {
+  color: #406f31;
+  background: #e2f4c4;
+}
+.insight-bar {
+  background: #55a34e;
+}
+.insight-bar-1 {
+  background: #9dc74c;
+}
+.insight-bar-2 {
+  background: #efa25a;
+}
+.insight-bar-3 {
+  background: #a585db;
+}
+.insight-app-logo.peach {
+  background: #ffe0b7;
+  color: #d9802a;
+}
+.insight-app-logo.purple {
+  background: #ecd9ff;
+  color: #9562cc;
+}
+.insight-app-logo.green {
+  background: #dcf2b9;
+  color: #72a03b;
+}
+.insight-manual-badge {
+  color: #6b863f;
+  background: #eff7df;
+}
+.insight-integration-banner {
+  background: #eaf6ce;
+  border-color: #d4e9a6;
+}
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus {
+  border-color: #6fa346;
+  box-shadow: 0 0 0 3px #83b75020;
+}
+.welcome-banner {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 0 0 26px;
+  padding: 22px;
+  background: linear-gradient(115deg, #e7f6cd, #f5fadd);
+  border: 1px solid #d1e5a7;
+  border-radius: 12px;
+}
+.welcome-icon {
+  display: grid;
+  place-items: center;
+  width: 49px;
+  height: 49px;
+  flex-shrink: 0;
+  background: #ccec99;
+  border-radius: 14px;
+  color: #628828;
+}
+.welcome-banner > div {
+  flex: 1;
+}
+.welcome-banner h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #3b6829;
+}
+.welcome-banner p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #788d55;
+  margin-top: 6px;
+}
+.workspace-reset-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding-top: 23px;
+  margin-top: 25px;
+  border-top: 1px solid #e6e5d8;
+}
+.workspace-reset-section h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #9e6245;
+}
+.workspace-reset-section p {
+  font-size: 11px;
+  color: #a28d7b;
+  line-height: 1.8;
+  margin-top: 7px;
+}
+.button.danger-outline {
+  border-color: #e5bca4;
+  color: #ae6848;
+  background: #fff5ed;
+}
+.button.danger-outline:hover {
+  border-color: #cf9979;
+  background: #ffe8d8;
+}
+.button.danger {
+  background: #b85e41;
+  border-color: #b85e41;
+  color: #fff;
+}
+.reset-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 18px;
+  background: #fff0e2;
+  border: 1px solid #f0d3ba;
+  color: #ad6d40;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+.reset-warning h3 {
+  font-size: 13px;
+  line-height: 1.6;
+  font-weight: 600;
+}
+.reset-warning p {
+  font-size: 12px;
+  line-height: 1.8;
+  margin-top: 7px;
+  color: #98765b;
+}
+.reset-counts {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 25px;
+}
+.reset-counts > span {
+  padding: 7px 9px;
+  background: #f0f5e8;
+  border-radius: 5px;
+  font-size: 11px;
+  color: #7f9167;
+}
+.reset-counts strong {
+  color: #567b35;
+}
+@media (max-width: 800px) {
+  .welcome-banner {
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 20px;
+  }
+  .welcome-banner > div {
+    flex: 1;
+    min-width: 180px;
+  }
+  .welcome-banner > .button {
+    margin-left: 63px;
+  }
+}
+@media (max-width: 450px) {
+  .welcome-banner h2 {
+    font-size: 14px;
+  }
+  .welcome-banner p {
+    font-size: 11px;
+  }
+  .welcome-banner > .button {
+    margin-left: 0;
+    width: 100%;
+  }
+  .welcome-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+  }
+}

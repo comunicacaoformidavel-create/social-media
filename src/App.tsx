@@ -48,6 +48,7 @@ import {
   TaskEditor,
 } from "./components/Editors";
 import { IntegrationsPage, ReportsPage } from "./components/InsightsPages";
+import { ResetWorkspace } from "./components/ResetWorkspace";
 
 const navItems: { page: Page; icon: typeof LayoutDashboard }[] = [
   { page: "overview", icon: LayoutDashboard },
@@ -136,6 +137,7 @@ export default function App() {
   const [deletion, setDeletion] = useState<DeleteItem>(null);
   const [deleting, setDeleting] = useState(false);
   const [settings, setSettings] = useState(false);
+  const [resettingWorkspace, setResettingWorkspace] = useState(false);
   const [mobileNav, setMobileNav] = useState(false);
   const [notifications, setNotifications] = useState(false);
   const [query, setQuery] = useState("");
@@ -244,8 +246,16 @@ export default function App() {
       setDeleting(false);
     }
   };
-  const newTask = (date?: string, status?: Status) =>
+  const newTask = (date?: string, status?: Status) => {
+    if (!state?.clients.length) {
+      setEditor({ kind: "client", client: null });
+      notify(
+        "Cadastre seu primeiro cliente para começar a planejar conteúdos.",
+      );
+      return;
+    }
     setEditor({ kind: "task", task: null, date, status });
+  };
   const editTask = (task: Task) => {
     setEditor({ kind: "task", task });
     setSearchFocused(false);
@@ -499,7 +509,9 @@ export default function App() {
                 onClick={() => setNotifications(!notifications)}
               >
                 <Bell size={19} />
-                <span className="notification-dot" />
+                {state.activities.length > 0 && (
+                  <span className="notification-dot" />
+                )}
               </button>
               {notifications && (
                 <>
@@ -575,6 +587,27 @@ export default function App() {
                   </button>
                 </div>
               </div>
+              {!state.clients.length && (
+                <section className="welcome-banner">
+                  <span className="welcome-icon">
+                    <Sparkles size={26} />
+                  </span>
+                  <div>
+                    <h2>Seu próximo capítulo começa aqui.</h2>
+                    <p>
+                      Cadastre seu primeiro cliente e dê vida ao seu calendário
+                      de conteúdos.
+                    </p>
+                  </div>
+                  <button
+                    className="button primary"
+                    onClick={() => setEditor({ kind: "client", client: null })}
+                  >
+                    <Plus size={16} />
+                    Cadastrar primeiro cliente
+                  </button>
+                </section>
+              )}
               <Dashboard
                 {...actions}
                 checklist={state.checklist}
@@ -671,7 +704,7 @@ export default function App() {
               {state.meta.demo
                 ? "Workspace iniciado com dados fictícios"
                 : "Compasso Social"}{" "}
-              <span className="footer-dot">·</span> v1.0
+              <span className="footer-dot">·</span> v1.1
             </span>
           </footer>
         </main>
@@ -771,8 +804,9 @@ export default function App() {
                 <Sparkles size={17} /> Um ponto de partida
               </h4>
               <p>
-                Este espaço começou com exemplos fictícios. Você pode editá-los,
-                excluí-los e adicionar seus próprios clientes e conteúdos.
+                {state.meta.demo
+                  ? "Este espaço contém exemplos fictícios. Use a opção Começar do zero para limpar os dados e cadastrar seus clientes."
+                  : "Seu espaço está pronto para os seus clientes. Cadastre suas marcas, organize as demandas e acompanhe seus resultados."}
               </p>
             </div>
             <div className="settings-info">
@@ -795,8 +829,42 @@ export default function App() {
               Importação e backup
               <ArrowRight size={15} />
             </button>
+            <div className="workspace-reset-section">
+              <div>
+                <h4>Começar do zero</h4>
+                <p>
+                  Limpe todos os dados deste app para iniciar um novo workspace.
+                </p>
+              </div>
+              <button
+                className="button danger-outline"
+                onClick={() => {
+                  setSettings(false);
+                  setResettingWorkspace(true);
+                }}
+              >
+                <Trash2 size={15} />
+                Limpar dados do app
+              </button>
+            </div>
           </div>
         </Modal>
+      )}
+      {resettingWorkspace && (
+        <ResetWorkspace
+          state={state}
+          onClose={() => setResettingWorkspace(false)}
+          onReset={async () => {
+            await mutate("/workspace/reset", "POST", {
+              confirmation: "LIMPAR",
+            });
+            setResettingWorkspace(false);
+            setClientId("all");
+            setQuery("");
+            navigate("overview");
+            notify("Tudo limpo! Seu espaço está pronto para começar.");
+          }}
+        />
       )}
       {toast && (
         <div className="toast" role="status">
@@ -957,16 +1025,18 @@ function Dashboard({
             </div>
             <div className="stat-number">
               {s.count}
-              <span className={`stat-spark ${s.cls}`} aria-hidden="true">
-                {Array.from({ length: 8 }, (_, i) => (
-                  <i
-                    key={i}
-                    style={{
-                      height: `${16 + tasks.filter((t) => t.status === (s.cls === "purple" ? "review" : s.cls === "peach" ? "scheduled" : "published") && new Date(t.date + "T12:00:00").getDay() === i % 7).length * 11}px`,
-                    }}
-                  />
-                ))}
-              </span>
+              {tasks.length > 0 && (
+                <span className={`stat-spark ${s.cls}`} aria-hidden="true">
+                  {Array.from({ length: 8 }, (_, i) => (
+                    <i
+                      key={i}
+                      style={{
+                        height: `${16 + tasks.filter((t) => t.status === (s.cls === "purple" ? "review" : s.cls === "peach" ? "scheduled" : "published") && new Date(t.date + "T12:00:00").getDay() === i % 7).length * 11}px`,
+                      }}
+                    />
+                  ))}
+                </span>
+              )}
             </div>
             <div className="stat-foot">
               <s.footIcon size={12} />

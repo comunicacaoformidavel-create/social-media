@@ -9,25 +9,25 @@ import "./editors.css";
 type Save = (data: Record<string, unknown>) => Promise<void>;
 
 const clientColors = [
-  { value: "#d9a175", name: "Terracota" },
-  { value: "#7f9c83", name: "Verde" },
-  { value: "#8b9fae", name: "Azul" },
-  { value: "#b59bc4", name: "Lilás" },
-  { value: "#d599ad", name: "Rosa" },
-  { value: "#c3ad6e", name: "Dourado" },
+  { value: "#ea7b36", name: "Terracota" },
+  { value: "#1e9c67", name: "Verde" },
+  { value: "#3786d8", name: "Azul" },
+  { value: "#9163dc", name: "Lilás" },
+  { value: "#e55f94", name: "Rosa" },
+  { value: "#dcaa20", name: "Dourado" },
 ];
 const coverColors = [
-  { value: "peach", color: "#edd8c6", name: "Pêssego" },
-  { value: "sage", color: "#d9e2cf", name: "Sálvia" },
-  { value: "pink", color: "#efd6dc", name: "Rosa" },
-  { value: "blue", color: "#d7e3e8", name: "Azul" },
-  { value: "sand", color: "#e8dfc7", name: "Areia" },
+  { value: "peach", color: "#ffd3a6", name: "Pêssego" },
+  { value: "sage", color: "#d1ef9e", name: "Sálvia" },
+  { value: "pink", color: "#ffcbdc", name: "Rosa" },
+  { value: "blue", color: "#bde1ff", name: "Azul" },
+  { value: "sand", color: "#ffe59a", name: "Areia" },
 ];
 const noteColors = [
-  { value: "yellow", color: "#f6edcc", name: "Amarelo" },
-  { value: "pink", color: "#f1dce2", name: "Rosa" },
-  { value: "green", color: "#e1e9d8", name: "Verde" },
-  { value: "blue", color: "#dfebef", name: "Azul" },
+  { value: "yellow", color: "#ffed9c", name: "Amarelo" },
+  { value: "pink", color: "#ffd2e5", name: "Rosa" },
+  { value: "green", color: "#d4f0b6", name: "Verde" },
+  { value: "blue", color: "#c9e8ff", name: "Azul" },
 ];
 
 export function Modal({
